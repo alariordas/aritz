@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de expediciones</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="cabecera">
+  <div class="cabecera-contenido">
+    <p class="etiqueta">DWEC · 2.º DAW</p>
+    <h1>Gestión de expediciones</h1>
+    <p>Crea expediciones, añade paquetes y controla cada envío.</p>
+  </div>
+</header>
+<main class="contenedor">
+  <section class="panel">
+    <h2>Crear una expedición</h2>
+    <div class="formulario tres-columnas">
+      <div><label for="destinoExpedicion">Destino</label><input id="destinoExpedicion" type="text" placeholder="Barcelona"></div>
+      <div><label for="capacidadExpedicion">Capacidad máxima, kg</label><input id="capacidadExpedicion" type="number" min="0" step="0.01" placeholder="25"></div>
+      <div><label for="consumoExpedicion">Consumo base</label><input id="consumoExpedicion" type="number" min="0" step="0.01" placeholder="9"></div>
+    </div>
+    <button id="btnCrearExpedicion" type="button">Crear expedición</button>
+  </section>
+
+  <section class="panel panel-destacado">
+    <div>
+      <label for="expedicionSelect">Expedición activa</label>
+      <select id="expedicionSelect"></select>
+    </div>
+    <div id="datosExpedicion" class="datos-expedicion" aria-live="polite"></div>
+  </section>
+
+  <div class="rejilla">
+    <section class="panel">
+      <h2>Añadir paquete</h2>
+      <div class="formulario">
+        <div><label for="codigoPaquete">Código</label><input id="codigoPaquete" type="text" placeholder="P05"></div>
+        <div><label for="pesoPaquete">Peso, kg</label><input id="pesoPaquete" type="number" min="0" step="0.01" placeholder="4"></div>
+        <label class="check"><input id="urgentePaquete" type="checkbox"> Paquete urgente</label>
+      </div>
+      <button id="btnAnadirPaquete" type="button">Añadir paquete</button>
+      <p id="avisoPaquetes" class="aviso"></p>
+    </section>
+
+    <section class="panel">
+      <h2>Acciones</h2>
+      <div class="acciones">
+        <button id="btnCalcularCoste" type="button">Calcular coste</button>
+        <button id="btnGenerarResumen" type="button">Generar resumen</button>
+        <button id="btnAvanzarEstado" type="button">Avanzar estado</button>
+      </div>
+      <div id="resultadoExpedicion" class="resultado" aria-live="polite"></div>
+    </section>
+  </div>
+
+  <section class="panel">
+    <h2>Paquetes de la expedición</h2>
+    <div id="listaPaquetes" class="lista-paquetes"></div>
+  </section>
+
+  <section class="panel zona-peligro">
+    <div><h2>Restablecer aplicación</h2><p>Elimina todos los cambios y recupera los datos iniciales.</p></div>
+    <button id="btnRestablecer" type="button" class="secundario">Restablecer datos</button>
+  </section>
+  <div id="mensaje" class="mensaje" aria-live="polite"></div>
+</main>
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,283 @@
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #eef1f4;
+  color: #222222;
+  line-height: 1.5;
+}
+
+.cabecera {
+  background-color: #1f3b57;
+  color: white;
+  padding: 30px 15px;
+}
+
+.cabecera-contenido {
+  width: 1000px;
+  max-width: 95%;
+  margin: 0 auto;
+}
+
+.cabecera h1 {
+  margin: 5px 0;
+  font-size: 34px;
+}
+
+.cabecera p {
+  margin: 4px 0;
+}
+
+.etiqueta {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: 0;
+}
+
+.contenedor {
+  width: 1000px;
+  max-width: 95%;
+  margin: 25px auto 40px auto;
+}
+
+.panel {
+  background-color: white;
+  border: 1px solid #cfd6dd;
+  border-radius: 6px;
+  padding: 18px;
+  margin-bottom: 15px;
+}
+
+.panel h2 {
+  margin: 0 0 12px 0;
+  font-size: 19px;
+  color: #1f3b57;
+}
+
+.formulario {
+  margin-bottom: 12px;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 3px;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 7px;
+  border: 1px solid #a8b0b8;
+  border-radius: 3px;
+  font-size: 14px;
+  font-family: Arial, Helvetica, sans-serif;
+  box-sizing: border-box;
+}
+
+input:focus,
+select:focus {
+  outline: 2px solid #7fb2bd;
+  border-color: #2a7f8e;
+}
+
+.tres-columnas {
+  display: flex;
+  gap: 10px;
+}
+
+.tres-columnas div {
+  flex: 1;
+}
+
+.panel-destacado {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  border-left: 5px solid #2a7f8e;
+}
+
+.panel-destacado > div:first-child {
+  flex: 0 0 220px;
+}
+
+.panel-destacado > div:last-child {
+  flex: 1;
+  min-width: 250px;
+}
+
+.datos-expedicion {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dato {
+  background-color: #eef1f4;
+  padding: 6px 10px;
+  border-radius: 3px;
+  font-size: 14px;
+}
+
+.rejilla {
+  display: flex;
+  gap: 15px;
+}
+
+.rejilla .panel {
+  flex: 1;
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+button {
+  background-color: #245b78;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  padding: 9px 12px;
+  font-size: 14px;
+  font-family: Arial, Helvetica, sans-serif;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #1f3b57;
+}
+
+.secundario {
+  background-color: white;
+  color: #a64040;
+  border: 1px solid #a64040;
+}
+
+.secundario:hover {
+  background-color: #f7eaea;
+  color: #a64040;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: normal;
+  margin-top: 5px;
+}
+
+.check input {
+  width: auto;
+  margin: 0;
+}
+
+.resultado {
+  background-color: #eaf5f2;
+  border-radius: 3px;
+  padding: 10px;
+  margin-top: 12px;
+  min-height: 22px;
+  font-size: 14px;
+  white-space: pre-line;
+}
+
+.aviso {
+  color: #a64040;
+  font-size: 14px;
+  min-height: 18px;
+  margin: 8px 0 0 0;
+}
+
+.vacio {
+  color: #666666;
+  font-size: 14px;
+  margin: 0;
+}
+
+.lista-paquetes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.paquete {
+  background-color: #eef1f4;
+  border-left: 4px solid #245b78;
+  border-radius: 3px;
+  padding: 9px 12px;
+  min-width: 150px;
+}
+
+.paquete.urgente {
+  background-color: #fdf3e3;
+  border-left-color: #d97706;
+}
+
+.paquete strong {
+  display: block;
+  color: #1f3b57;
+}
+
+.paquete span {
+  display: block;
+  font-size: 13px;
+  color: #444444;
+}
+
+.zona-peligro {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.zona-peligro h2 {
+  margin-bottom: 4px;
+}
+
+.zona-peligro p {
+  margin: 0;
+  font-size: 14px;
+  color: #555555;
+}
+
+.mensaje {
+  position: fixed;
+  right: 15px;
+  bottom: 15px;
+  background-color: #1f3b57;
+  color: white;
+  padding: 10px 14px;
+  border-radius: 4px;
+  font-size: 14px;
+  display: none;
+  max-width: 400px;
+}
+
+.mensaje.visible {
+  display: block;
+}
+
+.mensaje.error {
+  background-color: #a64040;
+}
+
+@media (max-width: 700px) {
+  .rejilla,
+  .tres-columnas,
+  .panel-destacado {
+    flex-direction: column;
+  }
+
+  .zona-peligro {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cabecera h1 {
+    font-size: 26px;
+  }
+}

@@ -1,3 +1,5 @@
 # aritz
 
-Repositorio creado el 2026-11-10.
+Examen de DWEC: gestión de expediciones.
+
+Abrir `index.html` en el navegador para usar la aplicación.
