@@ -40,78 +40,113 @@ function calcularPesoTotal(paquetes) {
 }
 
 function crearExpedicion(expediciones, destino, capacidadMaxima, consumoBase) {
-  var ultimoId = 0;
+  var nombre = String(destino).trim();
+  if (nombre === "") {
+    return { creada: false, mensaje: "El destino es obligatorio", expedicion: null };
+  }
+  var capacidad = Number(capacidadMaxima);
+  if (isNaN(capacidad) || capacidad <= 0) {
+    return { creada: false, mensaje: "La capacidad debe ser mayor que cero", expedicion: null };
+  }
+  var consumo = Number(consumoBase);
+  if (isNaN(consumo) || consumo <= 0) {
+    return { creada: false, mensaje: "El consumo base debe ser mayor que cero", expedicion: null };
+  }
+  var id = 1;
   for (var i = 0; i < expediciones.length; i++) {
-    if (expediciones[i].id > ultimoId) {
-      ultimoId = expediciones[i].id;
+    if (expediciones[i].id >= id) {
+      id = expediciones[i].id + 1;
     }
   }
   var expedicion = {
-    id: ultimoId + 1,
-    destino: String(destino).trim(),
-    capacidadMaxima: Number(capacidadMaxima),
-    consumoBase: Number(consumoBase),
+    id: id,
+    destino: nombre,
+    capacidadMaxima: capacidad,
+    consumoBase: consumo,
     paquetes: [],
     estado: "preparando"
   };
-  expediciones.push(expedicion);
-  return expedicion;
+  return { creada: true, mensaje: "Expedición creada correctamente", expedicion: expedicion };
 }
 
 function validarPaquete(expedicion, nuevoPaquete) {
+  if (expedicion.estado !== "preparando") {
+    return { valido: false, mensaje: "Solo se pueden añadir paquetes a una expedición en preparación" };
+  }
   var codigo = String(nuevoPaquete.codigo).trim();
+  if (codigo === "") {
+    return { valido: false, mensaje: "El código es obligatorio" };
+  }
   var peso = Number(nuevoPaquete.peso);
-  if (codigo == "" || isNaN(peso) || peso <= 0) {
-    return false;
+  if (isNaN(peso) || peso <= 0) {
+    return { valido: false, mensaje: "El peso debe ser mayor que cero" };
   }
   for (var i = 0; i < expedicion.paquetes.length; i++) {
-    if (expedicion.paquetes[i].codigo.toLowerCase() == codigo.toLowerCase()) {
-      return false;
+    if (expedicion.paquetes[i].codigo.trim().toLowerCase() === codigo.toLowerCase()) {
+      return { valido: false, mensaje: "El código ya existe" };
     }
   }
   var total = calcularPesoTotal(expedicion.paquetes) + peso;
   if (total > expedicion.capacidadMaxima) {
-    return false;
+    return { valido: false, mensaje: "Se supera la capacidad máxima" };
   }
-  return true;
+  return { valido: true, mensaje: "Paquete válido" };
 }
 
 function calcularCoste(expedicion) {
   var peso = calcularPesoTotal(expedicion.paquetes);
-  var coste = expedicion.consumoBase * 2 + peso * 1.25;
-  for (var i = 0; i < expedicion.paquetes.length; i++) {
-    if (expedicion.paquetes[i].urgente == true) {
-      coste = coste + 3;
-    }
-  }
-  return Math.round(coste * 100) / 100;
-}
-
-function obtenerSiguienteEstado(expedicion) {
-  if (expedicion.estado == "preparando") {
-    return "en ruta";
-  } else if (expedicion.estado == "en ruta") {
-    return "entregado";
-  } else {
-    return "entregado";
-  }
-}
-
-function generarResumen(expedicion) {
-  var peso = calcularPesoTotal(expedicion.paquetes);
-  var coste = calcularCoste(expedicion);
   var urgentes = 0;
   for (var i = 0; i < expedicion.paquetes.length; i++) {
-    if (expedicion.paquetes[i].urgente == true) {
+    if (expedicion.paquetes[i].urgente === true) {
       urgentes = urgentes + 1;
     }
   }
-  var texto = "Expedición #" + expedicion.id + " a " + expedicion.destino + "\n";
-  texto = texto + "Estado: " + expedicion.estado + "\n";
-  texto = texto + "Paquetes: " + expedicion.paquetes.length + " (" + urgentes + " urgentes)\n";
-  texto = texto + "Peso total: " + peso.toFixed(2) + " kg de " + expedicion.capacidadMaxima + " kg\n";
-  texto = texto + "Coste estimado: " + coste.toFixed(2) + " €";
-  return texto;
+  var subtotal = expedicion.consumoBase * 2 + peso * 0.5 + urgentes * 3;
+  if (peso > expedicion.capacidadMaxima * 0.8) {
+    subtotal = subtotal + subtotal * 0.15;
+  }
+  return Math.round(subtotal * 100) / 100;
+}
+
+function obtenerSiguienteEstado(expedicion) {
+  if (expedicion.estado === "preparando") {
+    if (expedicion.paquetes.length === 0) {
+      return { cambiado: false, nuevoEstado: "preparando", mensaje: "No se puede iniciar una expedición vacía" };
+    }
+    return { cambiado: true, nuevoEstado: "en ruta", mensaje: "La expedición está en ruta" };
+  }
+  if (expedicion.estado === "en ruta") {
+    return { cambiado: true, nuevoEstado: "entregada", mensaje: "La expedición ha sido entregada" };
+  }
+  return { cambiado: false, nuevoEstado: "entregada", mensaje: "La expedición ya está entregada" };
+}
+
+function generarResumen(expedicion) {
+  var pesoTotal = calcularPesoTotal(expedicion.paquetes);
+  var urgentes = 0;
+  var masPesado = null;
+  var pesoMaximo = -1;
+  for (var i = 0; i < expedicion.paquetes.length; i++) {
+    var paquete = expedicion.paquetes[i];
+    if (paquete.urgente === true) {
+      urgentes = urgentes + 1;
+    }
+    if (Number(paquete.peso) > pesoMaximo) {
+      pesoMaximo = Number(paquete.peso);
+      masPesado = paquete.codigo;
+    }
+  }
+  var ocupacion = 0;
+  if (expedicion.capacidadMaxima > 0) {
+    ocupacion = Math.round(pesoTotal / expedicion.capacidadMaxima * 10000) / 100;
+  }
+  return {
+    totalPaquetes: expedicion.paquetes.length,
+    pesoTotal: pesoTotal,
+    paquetesUrgentes: urgentes,
+    paqueteMasPesado: masPesado,
+    porcentajeOcupacion: ocupacion
+  };
 }
 
 var expediciones = [];
@@ -123,24 +158,24 @@ function copiarIniciales() {
 }
 
 function guardarDatos() {
-  localStorage.setItem("expedicionesDWEC", JSON.stringify(expediciones));
+  localStorage.setItem("expediciones", JSON.stringify(expediciones));
 }
 
 function cargarDatos() {
-  var texto = localStorage.getItem("expedicionesDWEC");
+  var texto = localStorage.getItem("expediciones");
   if (texto != null) {
     expediciones = JSON.parse(texto);
   } else {
     expediciones = copiarIniciales();
   }
-  if (expediciones.length == 0) {
+  if (expediciones.length === 0) {
     expediciones = copiarIniciales();
   }
 }
 
 function buscarSeleccionada() {
   for (var i = 0; i < expediciones.length; i++) {
-    if (expediciones[i].id == seleccionada) {
+    if (expediciones[i].id === seleccionada) {
       return expediciones[i];
     }
   }
@@ -165,7 +200,7 @@ function dibujarSelect() {
   var select = document.getElementById("expedicionSelect");
   var html = "";
   for (var i = 0; i < expediciones.length; i++) {
-    html = html + "<option value='" + expediciones[i].id + "'>#" + expediciones[i].id + " - " + expediciones[i].destino + "</option>";
+    html = html + "<option value='" + expediciones[i].id + "'>" + expediciones[i].destino + " - " + expediciones[i].estado + "</option>";
   }
   select.innerHTML = html;
   if (seleccionada == null && expediciones.length > 0) {
@@ -185,6 +220,7 @@ function dibujarDatos() {
   }
   var peso = calcularPesoTotal(expedicion.paquetes);
   var html = "";
+  html = html + "<span class='dato'>Destino: " + expedicion.destino + "</span>";
   html = html + "<span class='dato'>Estado: " + expedicion.estado + "</span>";
   html = html + "<span class='dato'>Paquetes: " + expedicion.paquetes.length + "</span>";
   html = html + "<span class='dato'>Peso: " + peso.toFixed(2) + " / " + expedicion.capacidadMaxima + " kg</span>";
@@ -195,7 +231,7 @@ function dibujarDatos() {
 function dibujarPaquetes() {
   var caja = document.getElementById("listaPaquetes");
   var expedicion = buscarSeleccionada();
-  if (expedicion == null || expedicion.paquetes.length == 0) {
+  if (expedicion == null || expedicion.paquetes.length === 0) {
     caja.innerHTML = "<p class='vacio'>No hay paquetes en esta expedición.</p>";
     return;
   }
@@ -203,7 +239,7 @@ function dibujarPaquetes() {
   for (var i = 0; i < expedicion.paquetes.length; i++) {
     var paquete = expedicion.paquetes[i];
     var clase = "paquete";
-    if (paquete.urgente == true) {
+    if (paquete.urgente === true) {
       clase = "paquete urgente";
     }
     html = html + "<div class='" + clase + "'>";
@@ -215,10 +251,21 @@ function dibujarPaquetes() {
   caja.innerHTML = html;
 }
 
+function dibujarBotonPaquete() {
+  var expedicion = buscarSeleccionada();
+  var boton = document.getElementById("btnAnadirPaquete");
+  if (expedicion == null || expedicion.estado !== "preparando") {
+    boton.disabled = true;
+  } else {
+    boton.disabled = false;
+  }
+}
+
 function dibujarTodo() {
   dibujarSelect();
   dibujarDatos();
   dibujarPaquetes();
+  dibujarBotonPaquete();
 }
 
 window.onload = function () {
@@ -231,6 +278,7 @@ window.onload = function () {
   document.getElementById("expedicionSelect").onchange = function () {
     seleccionada = Number(this.value);
     document.getElementById("resultadoExpedicion").innerHTML = "";
+    document.getElementById("avisoPaquetes").innerHTML = "";
     dibujarTodo();
   };
 
@@ -238,18 +286,19 @@ window.onload = function () {
     var destino = document.getElementById("destinoExpedicion").value;
     var capacidad = document.getElementById("capacidadExpedicion").value;
     var consumo = document.getElementById("consumoExpedicion").value;
-    if (destino.trim() == "" || capacidad == "" || Number(capacidad) <= 0 || consumo == "" || Number(consumo) <= 0) {
-      mostrarAviso("Rellena bien el destino, la capacidad y el consumo", true);
+    var resultado = crearExpedicion(expediciones, destino, capacidad, consumo);
+    if (resultado.creada === false) {
+      mostrarAviso(resultado.mensaje, true);
       return;
     }
-    var nueva = crearExpedicion(expediciones, destino, capacidad, consumo);
-    seleccionada = nueva.id;
+    expediciones.push(resultado.expedicion);
+    seleccionada = resultado.expedicion.id;
     guardarDatos();
     document.getElementById("destinoExpedicion").value = "";
     document.getElementById("capacidadExpedicion").value = "";
     document.getElementById("consumoExpedicion").value = "";
     dibujarTodo();
-    mostrarAviso("Expedición #" + nueva.id + " creada", false);
+    mostrarAviso(resultado.mensaje, false);
   };
 
   document.getElementById("btnAnadirPaquete").onclick = function () {
@@ -262,9 +311,10 @@ window.onload = function () {
     var peso = document.getElementById("pesoPaquete").value;
     var urgente = document.getElementById("urgentePaquete").checked;
     var nuevo = { codigo: codigo, peso: Number(peso), urgente: urgente };
-    if (validarPaquete(expedicion, nuevo) == false) {
-      document.getElementById("avisoPaquetes").innerHTML = "Ese paquete no se puede añadir";
-      mostrarAviso("Revisa el código, el peso o la capacidad", true);
+    var resultado = validarPaquete(expedicion, nuevo);
+    if (resultado.valido === false) {
+      document.getElementById("avisoPaquetes").innerHTML = resultado.mensaje;
+      mostrarAviso(resultado.mensaje, true);
       return;
     }
     document.getElementById("avisoPaquetes").innerHTML = "";
@@ -275,7 +325,7 @@ window.onload = function () {
     document.getElementById("urgentePaquete").checked = false;
     dibujarDatos();
     dibujarPaquetes();
-    mostrarAviso("Paquete añadido", false);
+    mostrarAviso(resultado.mensaje, false);
   };
 
   document.getElementById("btnCalcularCoste").onclick = function () {
@@ -285,7 +335,7 @@ window.onload = function () {
       return;
     }
     var coste = calcularCoste(expedicion);
-    document.getElementById("resultadoExpedicion").innerHTML = "Coste de la expedición #" + expedicion.id + ": " + coste.toFixed(2) + " €";
+    document.getElementById("resultadoExpedicion").innerHTML = "Coste de la expedición: " + coste.toFixed(2).replace(".", ",") + " €";
   };
 
   document.getElementById("btnGenerarResumen").onclick = function () {
@@ -294,7 +344,18 @@ window.onload = function () {
       mostrarAviso("No hay expedición seleccionada", true);
       return;
     }
-    document.getElementById("resultadoExpedicion").innerHTML = generarResumen(expedicion);
+    var resumen = generarResumen(expedicion);
+    var pesado = "ninguno";
+    if (resumen.paqueteMasPesado != null) {
+      pesado = resumen.paqueteMasPesado;
+    }
+    var html = "";
+    html = html + "Paquetes: " + resumen.totalPaquetes + "<br>";
+    html = html + "Peso total: " + resumen.pesoTotal + " kg<br>";
+    html = html + "Urgentes: " + resumen.paquetesUrgentes + "<br>";
+    html = html + "Paquete más pesado: " + pesado + "<br>";
+    html = html + "Ocupación: " + resumen.porcentajeOcupacion + " %";
+    document.getElementById("resultadoExpedicion").innerHTML = html;
   };
 
   document.getElementById("btnAvanzarEstado").onclick = function () {
@@ -303,18 +364,17 @@ window.onload = function () {
       mostrarAviso("No hay expedición seleccionada", true);
       return;
     }
-    if (expedicion.estado == "entregado") {
-      mostrarAviso("Esta expedición ya está entregada", true);
-      return;
+    var resultado = obtenerSiguienteEstado(expedicion);
+    if (resultado.cambiado === true) {
+      expedicion.estado = resultado.nuevoEstado;
+      guardarDatos();
     }
-    expedicion.estado = obtenerSiguienteEstado(expedicion);
-    guardarDatos();
-    dibujarDatos();
-    mostrarAviso("La expedición ahora está: " + expedicion.estado, false);
+    dibujarTodo();
+    mostrarAviso(resultado.mensaje, resultado.cambiado === false);
   };
 
   document.getElementById("btnRestablecer").onclick = function () {
-    localStorage.removeItem("expedicionesDWEC");
+    localStorage.removeItem("expediciones");
     expediciones = copiarIniciales();
     seleccionada = expediciones[0].id;
     document.getElementById("resultadoExpedicion").innerHTML = "";
