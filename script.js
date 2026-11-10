@@ -244,8 +244,7 @@ function dibujarPaquetes() {
     }
     html = html + "<div class='" + clase + "'>";
     html = html + "<strong>" + paquete.codigo + "</strong>";
-    html = html + "<span>" + paquete.peso + " kg</span>";
-    html = html + "<span>" + (paquete.urgente ? "urgente" : "normal") + "</span>";
+    html = html + "<span>" + paquete.peso + " kg · " + (paquete.urgente ? "urgente" : "normal") + "</span>";
     html = html + "</div>";
   }
   caja.innerHTML = html;
